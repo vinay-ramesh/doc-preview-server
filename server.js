@@ -13,7 +13,21 @@ app.use(express.json());
 app.post("/upload", upload.single("file"), async (req, res) => {
   try {
     const filePath = path.join(__dirname, req.file.path);
-    const result = await mammoth.convertToHtml({ path: filePath });
+    const result = await mammoth.convertToHtml({
+      path: filePath, // Example: if equations are in a specific custom XML tag
+      customXml: {
+        "m:oMath": function (element) {
+          // 'element' would contain the OMML XML.
+          // You'd need to parse this OMML into a renderable format (like MathML or LaTeX) here.
+          // This is a complex task requiring another library or a custom parser.
+          return {
+            elementName: "span",
+            attributes: { "data-math-omml": element.children[0].value }, // Store raw OMML
+            children: []
+          };
+        }
+      }
+    });
 
     // Simplified JSON wrapping HTML content
     const json = { content: result.value };
